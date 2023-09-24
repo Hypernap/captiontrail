@@ -6,49 +6,52 @@ class App extends React.Component {
     super();
     this.state = {
       liveCaption: '',
+      recognizing: false,
     };
   }
 
   componentDidMount() {
-    // Initialize annyang
+    // Initialize annyang, but don't start it automatically here
     if (annyang) {
-      annyang.start();
       annyang.addCallback('result', this.handleSpeech);
     } else {
       console.log('Speech recognition not supported');
     }
-
-    // Set an interval to capture live captions every 3 seconds
-    this.interval = setInterval(this.captureLiveCaption, 3000);
   }
 
   componentWillUnmount() {
-    // Clear the interval when the component unmounts
-    clearInterval(this.interval);
+    // Stop annyang when the component unmounts
+    annyang.abort();
   }
 
   handleSpeech = (phrases) => {
     if (phrases.length > 0) {
       const caption = phrases[0];
-      // Remove the console.log statement to prevent logging
       this.setState({ liveCaption: caption });
     }
   };
 
-  captureLiveCaption = () => {
-    // Manually capture the live caption
-    const { result } = annyang.getSpeechRecognizer();
-    if (result) {
-      this.setState({ liveCaption: result });
-    }
+  startRecognition = () => {
+    annyang.start();
+    this.setState({ recognizing: true });
+  };
+
+  stopRecognition = () => {
+    annyang.abort();
+    this.setState({ recognizing: false });
   };
 
   render() {
-    const { liveCaption } = this.state;
+    const { liveCaption, recognizing } = this.state;
 
     return (
       <div className="App">
-        <button onClick={this.handleClick}>Start Captioning</button>
+        <button onClick={this.startRecognition} disabled={recognizing}>
+          Start Captioning
+        </button>
+        <button onClick={this.stopRecognition} disabled={!recognizing}>
+          Stop Captioning
+        </button>
         <div className="live-caption">
           <p>Live Caption:</p>
           <div className="caption-text">{liveCaption}</div>
