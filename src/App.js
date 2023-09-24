@@ -1,25 +1,35 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import annyang from 'annyang';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends React.Component {
+  componentDidMount() {
+    // Initialize annyang
+    if (annyang) {
+      annyang.start();
+      annyang.addCallback('result', this.handleSpeech);
+    } else {
+      console.log('Speech recognition not supported');
+    }
+  }
+
+  handleSpeech = (phrases) => {
+    if (phrases.length > 0) {
+      const caption = phrases[0];
+      console.log('Live Caption:', caption);
+    }
+  };
+
+  handleClick = () => {
+    // No need for anything here since annyang is capturing speech continuously
+  };
+
+  render() {
+    return (
+      <div className="App">
+        <button onClick={this.handleClick}>Start Captioning</button>
+      </div>
+    );
+  }
 }
 
 export default App;
